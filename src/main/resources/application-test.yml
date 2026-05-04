@@ -1,0 +1,14 @@
+spring:
+  main:
+    web-application-type: reactive
+
+embabel:
+  agent:
+    logging:
+      personality: starwars
+    scanning:
+      annotation: true
+
+research:
+  angle-count: 2
+  key-point-count: 3

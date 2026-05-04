@@ -1,0 +1,54 @@
+spring:
+  config:
+    import:
+      - optional:file:./.env.properties
+  application:
+    name: embabel-test
+  main:
+    web-application-type: reactive
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /openapi3.yaml
+    disable-swagger-default-url: true
+
+embabel:
+  agent:
+    logging:
+      personality: starwars
+    scanning:
+      annotation: true
+    platform:
+      models:
+        openai:
+          custom:
+            api-key: ${LLM_API_KEY}
+            base-url: ${LLM_BASE_URL}
+            models: ${LLM_MODEL:qwen3.5-27b}
+      llm-operations:
+        prompts:
+          default-timeout: 240s
+  models:
+    default-llm: ${LLM_MODEL:qwen3.5-27b}
+
+research:
+  angle-count: 4
+  key-point-count: 5
+  llm-model: ${LLM_MODEL:qwen3.5-27b}
+
+deep-research:
+  subtopic-count: 5
+  section-word-count: 200
+
+tavily:
+  api-key: ${TAVILY_API_KEY:}
+  base-url: ${TAVILY_BASE_URL:https://api.tavily.com}
+
+logging:
+  level:
+    com.example.embabeltest: INFO
+    com.embabel: INFO
