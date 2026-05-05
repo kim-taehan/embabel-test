@@ -440,13 +440,18 @@ REST Docs 테스트 → `restdocs-api-spec` plugin → `build/api-spec/openapi3.
 ## 9. 더 읽을거리
 
 - 📘 [`docs.embabel.md`](./docs.embabel.md) — **Embabel 프레임워크 심층 문서**
-  - §1–3: GOAP / OODA 등 핵심 컨셉
-  - §4: A* 플래너 알고리즘 (라이브러리 실제 소스 인용)
-  - §5: LangChain / LangGraph / CrewAI 와의 비교 + 언어 포지셔닝 (TS·Python·JVM)
-  - §6: `/api/deep-research/stream` 의 Embabel 코드 레벨 워크스루 (`@Agent`, `@Action`, `@LlmTool`, `AgentInvocation`, 리스너)
-  - §7: 오류 처리 / 재계획 / Fallback — `ActionRetryPolicy`, `ReplanRequestedException`, GOAP fallback 패턴
-  - §8: 도메인 검증, 툴 노출 범위 등 추가 패턴
-  - §9: 토큰 단위 스트리밍 한계와 트레이드오프
+  - §1: 들어가기 — *왜 JVM* 인가 (TS·Python·JVM 언어 포지셔닝)
+  - §2: 아키텍처 개요 — GOAP 분리, 빌딩블록, OODA
+  - §3: **런타임 추상화** — Blackboard / OperationContext / AgentProcess / ProcessOptions
+  - §4: 어노테이션 동작 모델 — `@Agent` / `@Action` / `@LlmTool`
+  - §5: `/api/deep-research/stream` 의 Embabel 코드 워크스루
+  - §6: **이벤트 카탈로그** — `AgenticEventListener` 23개 전체 + 클라이언트 라우팅 가이드
+  - §7: 오류 처리 / 재계획 / Fallback — 5층 방어선
+  - §8: **서브에이전트와 합성** — 개념 + 향후 확장 가이드
+  - §9: **테스트와 관측성** — `FakeOperationContext`, OTel·Micrometer 통합 패턴
+  - §10: 다른 프레임워크와의 차별점 — LangChain / LangGraph / CrewAI 비교
+  - §11: 토큰 단위 스트리밍 한계와 트레이드오프
+  - 부록 A: GOAP A\* 플래너 라이브러리 코드 / 부록 B: 향후 확장 패턴
 - [Embabel Agent Framework — GitHub](https://github.com/embabel/embabel-agent)
 - [Tavily Search API](https://docs.tavily.com/)
 
