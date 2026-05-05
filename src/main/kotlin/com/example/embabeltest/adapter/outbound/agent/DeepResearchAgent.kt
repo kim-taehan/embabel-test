@@ -5,6 +5,7 @@ import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.Agent
 import com.embabel.agent.api.common.OperationContext
 import com.embabel.agent.api.common.create
+import com.embabel.agent.core.ActionRetryPolicy
 import com.embabel.agent.domain.io.UserInput
 import com.embabel.common.ai.model.LlmOptions
 import org.springframework.beans.factory.annotation.Value
@@ -122,7 +123,7 @@ class DeepResearchAgent(
     }
 
     @AchievesGoal(description = "A multi-section research report has been produced")
-    @Action
+    @Action(actionRetryPolicy = ActionRetryPolicy.FIRE_ONCE)
     fun assembleReport(
         plan: AgentResearchPlan,
         drafts: AgentSectionDrafts,
