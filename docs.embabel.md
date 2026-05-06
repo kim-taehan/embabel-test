@@ -10,7 +10,7 @@
 
 - [1. 들어가기 — 무엇이고, 왜 JVM 인가](#1-들어가기--무엇이고-왜-jvm-인가)
 - [2. Perplexity clone cording (feat Embabel)](#2-perplexity-clone-cording-feat-embabel)
-- [3. Embabe으l 아키텍처](#3-embabel-아키텍처)
+- [3. Embabel 아키텍처](#3-embabel-아키텍처)
 - [4. GOAP 플래너 알고리즘 — Embabel 라이브러리 실제 코드](#4-goap-플래너-알고리즘--embabel-라이브러리-실제-코드)
 - [5. AI가 실수하면 어떻게 되나 — 오류 처리와 재계획](#5-ai가-실수하면-어떻게-되나--오류-처리와-재계획)
 - [6. 실증 — Brexit 보고서 한 번 돌려보기](#6-실증--brexit-보고서-한-번-돌려보기)

@@ -470,3 +470,102 @@ curl -N -X POST http://localhost:8080/api/deep-research/stream \
      -H 'Content-Type: application/json' \
      -d '{"topic":"최근 프랑스 경제"}'
 ```
+
+---
+
+## 부록: 실제 응답 예시 — Brexit 보고서
+
+> **입력**: `{"topic":"브렉시트 이후에 영국에 경제상황을 정리해줘"}`
+> **소요 시간**: 약 25초 (검색 11회 + LLM 호출 6회)
+> **결과**: 5개 섹션 · 19개 출처 · 한국어/영어 자료 혼용
+
+### 실시간 스트리밍 — SSE 이벤트 시퀀스 (요약)
+
+```
+event: started                  { topic: "브렉시트 이후에 영국에 경제상황을 정리해줘" }
+event: tool-invoked × 11        { tool: "tavily_search", input: "<쿼리>" }
+event: tool-returned × 11       { durationMs: 1083~1790, preview: "..." }
+event: tool-invoked             { tool: "current_date" }
+event: tool-returned            { durationMs: 1, preview: "Success(2026-05-06)" }
+event: deep-research-completed  { report: { ... } }
+```
+
+→ 약 25초 동안 22개의 SSE 이벤트가 실시간으로 도착. 마지막에 5섹션 보고서가 한꺼번에 완성.
+
+### 최종 보고서
+
+> # 브렉시트 이후 영국 경제 상황 보고서
+>
+> **작성 시점**: 2026-05-06
+> **분석 대상**: 무역 · 노동 · 환율 · 투자 · 재정 정책
+>
+> ---
+>
+> ## 요약 (Executive Summary)
+>
+> 본 보고서는 브렉시트 이후 영국 경제의 주요 변화를 무역, 노동, 환율, 투자 및 재정 정책 측면에서 종합적으로 분석합니다. **2026-05-06 기준**, 영국은 EU와의 비관세 장벽과 노동력 부족으로 인한 구조적 어려움을 겪고 있으며, 이는 경제 성장에 지속적인 영향을 미치고 있습니다. 이러한 맥락에서 정부의 재정 정책과 산업 재편 전략이 향후 경제 회복의 핵심 요소로 부각되고 있습니다.
+>
+> ---
+>
+> ## 1. 무역 장벽과 상품 교역량 변화
+>
+> 브렉시트 이후 영국과 EU 간 상품 교역은 비관세 장벽(NTB)의 급증으로 구조적 변화를 겪었습니다. 2021년 1월 TCA 발효 직후 영국 대 EU 상품 수출은 약 **40% 급감** 했으나 부분 회복되었습니다. 그러나 2017년 대비 2024년까지 대 EU 수출은 **23% 감소** 한 반면 수입은 5% 감소에 그쳐 무역 불균형이 심화되었습니다. 비관세 장벽 증가는 장기적으로 영국 기업 투자와 1인당 산출량을 각각 **2.5%·3% 낮추고** 생산성을 1.2% 감소시킬 것으로 추정됩니다.
+>
+> *출처*: [LSE](https://economic-policy.org/76th-economic-policy-panel/brexit-trade/) · [Global Angle](https://global-angle.com/brexit-impact-on-exports-in-uk/) · [Productivity Institute](https://www.productivity.ac.uk/wp-content/uploads/2025/08/WP057-Brexit-and-Non-Tariff-Barriers-August-2025.pdf) · [영국 의회 도서관](https://commonslibrary.parliament.uk/research-briefings/cbp-7851/)
+>
+> ---
+>
+> ## 2. 노동력 부족과 인력 이동 제한
+>
+> 2021년 도입된 새 이민 시스템은 EU 출신 노동자의 유입을 급감시켰고, 비EU 출신 노동자 증가로 일부 상쇄되었으나 저숙련 직종 인력 부족이 심화되었습니다. 특히 **건강·사회복지, 숙박·음식, 운송** 산업에서 인력 공급이 수요를 못 따라가는 상황이 발생. 스탠포드 연구에 따르면 브렉시트로 **2025년까지 고용 3~4% 감소, 생산성 3~4% 하락** 예상.
+>
+> *출처*: [CER](https://www.cer.eu/insights/impact-brexit-immigration-uk) · [IZA](https://docs.iza.org/dp15883.pdf) · [Stanford SIEPR](https://siepr.stanford.edu/publications/working-paper/economic-impact-brexit)
+>
+> ---
+>
+> ## 3. 파운드 환율 변동성과 물가 상승
+>
+> 브렉시트 투표 직후 2016년 5월~2017년 3월 파운드 실질 유효 환율 **11% 하락**. 수입 물가 상승 → 2022년 10월 소비자 물가 상승률 **11.1% 도달**. 2025년 영국 기업의 헤지 비율이 **2024년 45% → 53%** 로 상향되는 등 위험 관리 비용 증가.
+>
+> *출처*: [NIESR](https://niesr.ac.uk/blog/uk-trade-and-exchange-rate) · [KDI](https://eiec.kdi.re.kr/material/pageoneView.do?idx=1635) · [Reuters](https://www.reuters.com/world/uk/many-uk-firms-say-volatile-pound-triggered-losses-2025-need-hedge-grows-2025-12-11/)
+>
+> ---
+>
+> ## 4. 외국 직접 투자(FDI) 감소와 산업 재편
+>
+> 2024년 영국 내 FDI 유입액은 전년 대비 **279억 파운드 감소** 하여 134억 파운드. 브렉시트 투표 이후 FDI 유입은 약 **16~20% 감소** 추정. 산업별로는 금융·서비스업 → **기술·R&D 분야로 재편 가속**. EY 2024 보고서에 따르면 영국은 유럽 FDI 프로젝트 수 2위 유지, 본사·R&D 분야 점유율은 각각 34%·19%.
+>
+> *출처*: [ONS](https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments/bulletins/foreigndirectinvestmentinvolvingukcompanies/2024) · [UKTPO](https://www.uktpo.org/briefing-papers/not-backing-britain-fdi-inflows-since-the-brexit-referendum/) · [EY](https://www.ey.com/en_uk/newsroom/2025/05/uk-fdi-projects-second-in-europe)
+>
+> ---
+>
+> ## 5. 재정 정책과 경제 성장률 전망
+>
+> 영국 재무부 2026년 봄 전망: 인플레이션 하락 + **차입금 6년 만의 최저 수준** 으로 G7 평균 하회. 그러나 OBR 분석에 따르면 브렉시트 이후 무역 관계가 **장기 생산성을 EU 잔류 시보다 4% 낮춤**. 2026년 성장률 전망: NIESR **+1.4%**, OECD **+0.7%**. 1인당 GDP는 브렉시트가 없었을 경우보다 **6~8% 낮은 수준** 으로 추정.
+>
+> *출처*: [HM Treasury](https://www.gov.uk/government/news/spring-forecast-2026-the-right-economic-plan-for-britain) · [OBR](https://obr.uk/forecasts-in-depth/the-economy-forecast/brexit-analysis/) · [NIESR](https://niesr.ac.uk/reports/economic-outlook-winter-2026)
+>
+> ---
+>
+> ## 결론
+>
+> 브렉시트 이후 영국 경제는 **무역 장벽, 노동력 부족, 환율 변동성, FDI 감소** 등 구조적 도전에 직면해 성장 잠재력이 제한되었습니다. 정부의 재정 정책이 이를 완화하기 위해 노력하고 있으나, 근본적인 경제 구조 변화는 단기 해결이 어려우며 **장기 회복을 위해서는 포괄적인 개혁이 필요** 합니다.
+>
+> ---
+>
+> ### 핵심 수치 요약
+>
+> | 지표 | 변화 |
+> |------|------|
+> | 대 EU 수출 (2017→2024) | ▼ 23% |
+> | 1인당 GDP (vs EU 잔류 가정) | ▼ 6~8% |
+> | 비관세 장벽으로 인한 생산성 | ▼ 1.2% |
+> | FDI 유입 (2024) | ▼ 279억 파운드 |
+> | 파운드 실질 유효 환율 (2016~17) | ▼ 11% |
+> | 2026 성장률 전망 (NIESR / OECD) | +1.4% / +0.7% |
+
+### 주목할 점
+
+- **LLM이 검색 언어를 자율 선택** — 환율·재정 섹션에서 영어 검색 후 *"한국 자료가 더 풍부할 수 있겠다"* 판단해 한국어 추가 검색 → KDI, a-ha 등 한국어 출처가 인용됨
+- **모든 주장에 인라인 출처** — `gatherSections` 프롬프트의 *"Cite each claim inline as [URL]"* 규칙이 5개 섹션 모두에 일관되게 적용
+- **시점 박기** — `current_date()` 도구가 `frameReport` 단계에서 1회 호출되어 executive summary 에 *"2026-05-06 기준"* 자동 삽입
