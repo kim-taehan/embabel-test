@@ -439,19 +439,15 @@ REST Docs 테스트 → `restdocs-api-spec` plugin → `build/api-spec/openapi3.
 
 ## 9. 더 읽을거리
 
-- 📘 [`docs.embabel.md`](./docs.embabel.md) — **Embabel 프레임워크 심층 문서**
+- 📘 [`docs.embabel.md`](./docs.embabel.md) — **Embabel 프레임워크 심층 문서** (비개발자도 읽을 수 있는 톤)
   - §1: 들어가기 — *왜 JVM* 인가 (TS·Python·JVM 언어 포지셔닝)
-  - §2: 아키텍처 개요 — GOAP 분리, 빌딩블록, OODA
-  - §3: **런타임 추상화** — Blackboard / OperationContext / AgentProcess / ProcessOptions
-  - §4: 어노테이션 동작 모델 — `@Agent` / `@Action` / `@LlmTool`
-  - §5: `/api/deep-research/stream` 의 Embabel 코드 워크스루
-  - §6: **이벤트 카탈로그** — `AgenticEventListener` 23개 전체 + 클라이언트 라우팅 가이드
-  - §7: 오류 처리 / 재계획 / Fallback — 5층 방어선
-  - §8: **서브에이전트와 합성** — 개념 + 향후 확장 가이드
-  - §9: **테스트와 관측성** — `FakeOperationContext`, OTel·Micrometer 통합 패턴
-  - §10: 다른 프레임워크와의 차별점 — LangChain / LangGraph / CrewAI 비교
-  - §11: 토큰 단위 스트리밍 한계와 트레이드오프
-  - 부록 A: GOAP A\* 플래너 라이브러리 코드 / 부록 B: 향후 확장 패턴
+  - §2: `/api/deep-research` 4단계 파이프라인 + **`StreamingAgentEventListener` 가 SSE 이벤트를 어떻게 만드나**
+  - §3: Embabel 아키텍처 — **5가지 빌딩 블록** (Actions / Goals / Conditions / Domain Model / **Tools `@LlmTool`**) + OODA 실행 모델
+  - §4: GOAP 플래너 알고리즘 — Embabel 라이브러리 A\* 실제 코드 (`Plan.kt`, `ConditionWorldState.kt`, `AStarGoapPlanner.kt`, 두 단계 최적화)
+  - §5: AI 가 실수하면 어떻게 되나 — **5겹 안전망** (액션 재시도 → 도메인 검증 → GOAP replan → 명시적 replan → 무한루프 방어)
+  - §6: **실증** — Brexit 보고서 한 번 돌려보기 (이벤트 시퀀스 + §1~§5 증명 매핑 + 최종 보고서 전체)
+  - §7: 다른 도구와 비교 — LangChain / LangGraph / CrewAI / OpenAI Assistants vs Embabel + **토큰 스트리밍 한계 (트레이드오프)**
+  - §8: **개선 방향** — 속도(병렬화) / 신뢰성(Tavily fallback, disconnect) / 관측성(OTel·Micrometer) / 기능 확장(추가 Goal) + 우선순위 추천
 - [Embabel Agent Framework — GitHub](https://github.com/embabel/embabel-agent)
 - [Tavily Search API](https://docs.tavily.com/)
 
