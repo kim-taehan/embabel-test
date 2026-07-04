@@ -1,9 +1,9 @@
 plugins {
-    id("org.springframework.boot") version "3.5.11"
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.epages.restdocs-api-spec") version "0.19.4"
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.spring") version "2.1.10"
+    id("com.epages.restdocs-api-spec") version "0.20.1"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.spring") version "2.2.21"
 }
 
 group = "com.example"
@@ -29,11 +29,12 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-    val embabelVersion = "0.3.4"
+    // Spring Boot 4 / Spring AI 2.0 line
+    val embabelVersion = "2.0.0-SNAPSHOT"
     implementation("com.embabel.agent:embabel-agent-starter:$embabelVersion")
     implementation("com.embabel.agent:embabel-agent-openai-custom-autoconfigure:$embabelVersion")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.17")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito")
@@ -46,8 +47,8 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:4.0.2")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
-    testImplementation("com.epages:restdocs-api-spec:0.19.4")
-    testImplementation("com.epages:restdocs-api-spec-webtestclient:0.19.4")
+    testImplementation("com.epages:restdocs-api-spec:0.20.1")
+    testImplementation("com.epages:restdocs-api-spec-webtestclient:0.20.1")
 }
 
 openapi3 {
