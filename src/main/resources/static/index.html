@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deep Research 콘솔 · Embabel</title>
+<style>
+  :root {
+    --bg: #f2f4f5; --panel: #ffffff; --panel-2: #f7f9fa; --border: #e2e6ea;
+    --border-strong: #cfd6dc; --text: #1a1f28; --muted: #5a6273; --faint: #8b93a2;
+    --accent: #0f9b95; --accent-soft: #d8f0ee; --ok: #2f8f57; --active: #b5811f; --err: #c14b45;
+    --shadow: 0 1px 2px rgba(20,28,40,.06), 0 8px 24px rgba(20,28,40,.05);
+    --f-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --f-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --f-serif: Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1014; --panel: #161922; --panel-2: #1c202a; --border: #262b38;
+      --border-strong: #333a4a; --text: #e7e9f0; --muted: #8990a3; --faint: #5b6274;
+      --accent: #22c3bd; --accent-soft: #0f2b2b; --ok: #4ea86f; --active: #d9a441; --err: #d9605a;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f4f5; --panel: #ffffff; --panel-2: #f7f9fa; --border: #e2e6ea;
+    --border-strong: #cfd6dc; --text: #1a1f28; --muted: #5a6273; --faint: #8b93a2;
+    --accent: #0f9b95; --accent-soft: #d8f0ee; --ok: #2f8f57; --active: #b5811f; --err: #c14b45;
+    --shadow: 0 1px 2px rgba(20,28,40,.06), 0 8px 24px rgba(20,28,40,.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1014; --panel: #161922; --panel-2: #1c202a; --border: #262b38;
+    --border-strong: #333a4a; --text: #e7e9f0; --muted: #8990a3; --faint: #5b6274;
+    --accent: #22c3bd; --accent-soft: #0f2b2b; --ok: #4ea86f; --active: #d9a441; --err: #d9605a;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--f-sans);
+    font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 1240px; margin: 0 auto; padding: 20px clamp(14px, 3vw, 28px) 60px; }
+
+  .topbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 11px; }
+  .mark {
+    width: 30px; height: 30px; border-radius: 8px; flex: none; position: relative;
+    background: radial-gradient(circle at 30% 30%, var(--accent), color-mix(in srgb, var(--accent) 55%, #000));
+  }
+  .mark::after {
+    content: ""; position: absolute; inset: 0; border-radius: 8px;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .app.running .mark::after { animation: pulse 1.6s ease-out infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+    100% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+  .brand h1 { font-size: 17px; margin: 0; letter-spacing: -.01em; font-weight: 650; }
+  .brand .route { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); display: block; margin-top: 1px; }
+  .brand .route b { color: var(--accent); font-weight: 600; }
+  .spacer { flex: 1 1 auto; }
+  .theme-toggle {
+    font: inherit; font-size: 12px; color: var(--muted); cursor: pointer;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 11px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .theme-toggle:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .runrow {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+    box-shadow: var(--shadow); margin-bottom: 8px;
+  }
+  .field { flex: 1 1 320px; display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--faint); font-weight: 600; padding-left: 2px; }
+  .field input {
+    font: inherit; font-size: 15px; color: var(--text); background: var(--panel-2);
+    border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; outline: none;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .field input:disabled { opacity: .6; }
+  .btn {
+    font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; border-radius: 9px;
+    padding: 11px 20px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px;
+    transition: background .12s, transform .04s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-run { background: var(--accent); color: #fff; }
+  .btn-run:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+  .btn-stop { background: transparent; color: var(--err); border-color: color-mix(in srgb, var(--err) 45%, transparent); }
+  .btn-stop:hover { background: color-mix(in srgb, var(--err) 12%, transparent); }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .status {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600;
+    padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted);
+    background: var(--panel-2); white-space: nowrap;
+  }
+  .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+  .status[data-s="streaming"] { color: var(--active); border-color: color-mix(in srgb, var(--active) 40%, transparent); }
+  .status[data-s="streaming"] .dot { background: var(--active); animation: blink 1s steps(2) infinite; }
+  .status[data-s="done"] { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+  .status[data-s="done"] .dot { background: var(--ok); }
+  .status[data-s="failed"] { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); }
+  .status[data-s="failed"] .dot { background: var(--err); }
+  @keyframes blink { 50% { opacity: .3; } }
+  .hint { font-size: 11.5px; color: var(--faint); margin: 0 2px 18px; }
+
+  .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  .panel-head h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+  .panel-head .count { font-family: var(--f-mono); font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+  .stream { max-height: 640px; overflow-y: auto; padding: 6px 0; scroll-behavior: smooth; }
+  .stream:empty::after {
+    content: "조사를 시작하면 에이전트의 과정이 실시간으로 표시됩니다.";
+    display: block; padding: 40px 20px; text-align: center; color: var(--faint); font-size: 13px;
+  }
+  .ev { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; align-items: baseline; padding: 6px 16px; font-size: 13px; }
+  .ev .t { font-family: var(--f-mono); font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .ev .msg { min-width: 0; overflow-wrap: anywhere; }
+  .ev .msg .chip {
+    font-family: var(--f-mono); font-size: 10px; font-weight: 600; letter-spacing: .02em;
+    padding: 1.5px 6px; border-radius: 5px; margin-right: 7px; background: var(--panel-2);
+    color: var(--muted); border: 1px solid var(--border); display: inline-block; vertical-align: baseline; white-space: nowrap;
+  }
+  .ev .msg .txt { color: var(--text); }
+  .ev .msg .txt em { font-style: normal; color: var(--accent); font-family: var(--f-mono); font-size: 12px; }
+  .ev .dur { font-family: var(--f-mono); font-size: 10.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .ev.k-started .chip, .ev.k-plan-formulated .chip, .ev.k-deep-research-completed .chip { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); background: var(--accent-soft); }
+  .ev.k-action-started .chip { color: var(--text); }
+  .ev.k-action-completed .chip, .ev.k-section-drafted .chip { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+  .ev.k-tool-invoked .chip, .ev.k-tool-returned .chip { color: var(--active); border-color: color-mix(in srgb, var(--active) 32%, transparent); }
+  .ev.k-failed .chip { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); }
+  .ev.fresh { animation: slidein .28s ease; }
+  @keyframes slidein { from { opacity: 0; transform: translateY(-3px); } }
+
+  .report-empty { padding: 40px 20px; text-align: center; color: var(--faint); font-size: 13px; }
+  .plan { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .plan h3 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--faint); font-weight: 700; }
+  .plan ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; counter-reset: st; }
+  .plan li { display: grid; grid-template-columns: 22px 1fr auto; gap: 9px; align-items: center; padding: 6px 8px; border-radius: 8px; font-size: 13.5px; counter-increment: st; color: var(--muted); }
+  .plan li .idx { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; font-size: 10.5px; font-weight: 700; color: var(--faint); font-family: var(--f-mono); }
+  .plan li .idx::before { content: counter(st); }
+  .plan li .st { font-size: 10px; font-family: var(--f-mono); color: var(--faint); text-transform: uppercase; letter-spacing: .05em; }
+  .plan li.drafting { color: var(--text); background: var(--panel-2); }
+  .plan li.drafting .idx { border-color: var(--active); color: var(--active); border-style: dashed; animation: spin 1.4s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .plan li.drafting .st { color: var(--active); }
+  .plan li.done { color: var(--text); }
+  .plan li.done .idx { border-color: var(--ok); background: var(--ok); color: #fff; }
+  .plan li.done .idx::before { content: "\2713"; font-size: 12px; }
+  .plan li.done .st { color: var(--ok); }
+
+  .report { padding: 6px 20px 22px; display: none; }
+  .report.show { display: block; animation: fadein .4s ease; }
+  @keyframes fadein { from { opacity: 0; } }
+  .report .doc-topic { font-size: 11px; text-transform: uppercase; letter-spacing: .11em; color: var(--accent); font-weight: 700; margin: 14px 0 4px; }
+  .report h2.doc-title { font-family: var(--f-serif); font-size: 25px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -.01em; text-wrap: balance; font-weight: 700; }
+  .report .exec { font-family: var(--f-serif); font-size: 15.5px; line-height: 1.65; color: var(--text); border-left: 3px solid var(--accent); padding: 4px 0 4px 15px; margin: 16px 0 8px; background: linear-gradient(90deg, var(--accent-soft), transparent); border-radius: 0 6px 6px 0; }
+  .report .sec { padding: 16px 0; border-top: 1px solid var(--border); }
+  .report .sec h3 { font-family: var(--f-serif); font-size: 18px; margin: 0 0 8px; font-weight: 700; letter-spacing: -.005em; }
+  .report .sec p { font-family: var(--f-serif); font-size: 15px; line-height: 1.7; margin: 0 0 10px; color: var(--text); }
+  .report .sec p a.cite { font-family: var(--f-mono); font-size: 10px; color: var(--accent); text-decoration: none; vertical-align: super; padding: 0 1px; }
+  .report .sec p a.cite:hover { text-decoration: underline; }
+  .report .sources { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .report .sources a { font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-decoration: none; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .report .sources a:hover { border-color: var(--accent); color: var(--accent); }
+  .report .sources .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 700; align-self: center; margin-right: 2px; }
+  .report .conclusion { margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--border-strong); }
+  .report .conclusion h3 { font-family: var(--f-serif); font-size: 18px; margin: 0 0 8px; }
+  .report .conclusion p { font-family: var(--f-serif); font-size: 15px; line-height: 1.7; margin: 0; }
+  .report .allsources { margin-top: 18px; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>Deep Research 콘솔</h1>
+        <span class="route"><b>POST</b> /api/deep-research/stream · <b>SSE</b></span>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="theme-toggle" id="themeBtn" type="button">◐ 테마</button>
+  </div>
+
+  <form class="runrow" id="form">
+    <div class="field">
+      <label for="topic">조사 주제 (topic)</label>
+      <input id="topic" name="topic" value="전고체 배터리 상용화 전망" autocomplete="off" />
+    </div>
+    <button class="btn btn-run" id="runBtn" type="submit">▶ 조사 시작</button>
+    <button class="btn btn-stop" id="stopBtn" type="button" disabled>■ 중단</button>
+    <span class="status" id="status" data-s="idle"><span class="dot"></span><span id="statusTxt">대기 중</span></span>
+  </form>
+  <p class="hint">로컬 모델(ollama)로 실행 시 하위 주제별 웹검색·작성으로 수 분이 걸릴 수 있습니다. 진행 과정은 왼쪽에 실시간으로 표시됩니다.</p>
+
+  <div class="split">
+    <section class="panel" aria-label="에이전트 활동 스트림">
+      <div class="panel-head">
+        <h2>Activity — 이벤트 스트림</h2>
+        <span class="count" id="evCount">0 events</span>
+      </div>
+      <div class="stream" id="stream"></div>
+    </section>
+
+    <section class="panel" aria-label="리서치 리포트">
+      <div class="panel-head">
+        <h2>Report — 리서치 결과</h2>
+        <span class="count" id="repMeta"></span>
+      </div>
+      <div id="reportBody">
+        <div class="report-empty" id="reportEmpty">조사를 시작하면 계획과 리포트가 여기에 점진적으로 그려집니다.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var ENDPOINT = "/api/deep-research/stream";
+
+  function $(id) { return document.getElementById(id); }
+  var app = $("app"), form = $("form"), topicInput = $("topic");
+  var runBtn = $("runBtn"), stopBtn = $("stopBtn");
+  var statusEl = $("status"), statusTxt = $("statusTxt");
+  var stream = $("stream"), evCount = $("evCount");
+  var reportBody = $("reportBody"), repMeta = $("repMeta");
+
+  var controller = null, running = false, t0 = 0, evN = 0, draftedCount = 0, planLen = 0;
+
+  function setStatus(s, txt) { statusEl.dataset.s = s; statusTxt.textContent = txt; }
+  function clock() { return "+" + ((performance.now() - t0) / 1000).toFixed(1) + "s"; }
+  function esc(x) {
+    return String(x == null ? "" : x).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+  }
+  function trunc(s, n) { s = String(s == null ? "" : s); return s.length > n ? s.slice(0, n) + "…" : s; }
+
+  function pushEvent(type, html, dur) {
+    evN++;
+    var row = document.createElement("div");
+    row.className = "ev fresh k-" + type;
+    row.innerHTML =
+      '<span class="t">' + clock() + '</span>' +
+      '<span class="msg"><span class="chip">' + esc(type) + '</span><span class="txt">' + html + '</span></span>' +
+      '<span class="dur">' + (dur != null ? dur + "ms" : "") + '</span>';
+    stream.appendChild(row);
+    stream.scrollTop = stream.scrollHeight;
+    evCount.textContent = evN + (evN === 1 ? " event" : " events");
+    row.addEventListener("animationend", function () { row.classList.remove("fresh"); }, { once: true });
+  }
+
+  function ensureReportScaffold() {
+    if ($("planList")) return;
+    reportBody.innerHTML =
+      '<div class="plan"><h3 id="planTitle">조사 계획</h3><ol id="planList"></ol></div>' +
+      '<div class="report" id="report"></div>';
+  }
+
+  function renderPlan(subtopics) {
+    ensureReportScaffold();
+    planLen = subtopics.length; draftedCount = 0;
+    $("planTitle").textContent = "조사 계획 · 하위 주제 " + subtopics.length + "개";
+    var ol = $("planList");
+    ol.innerHTML = "";
+    subtopics.forEach(function (s, i) {
+      var li = document.createElement("li");
+      li.id = "plan-" + i;
+      li.innerHTML = '<span class="idx"></span><span class="lbl">' + esc(s) + '</span><span class="st">대기</span>';
+      ol.appendChild(li);
+    });
+    setPlan(0, "drafting", "조사중");
+  }
+  function setPlan(i, state, label) {
+    var li = $("plan-" + i);
+    if (!li) return;
+    li.className = state;
+    li.querySelector(".st").textContent = label;
+  }
+  function onSectionDrafted() {
+    if (!$("planList")) return;
+    setPlan(draftedCount, "done", "완료");
+    draftedCount++;
+    if (draftedCount < planLen) setPlan(draftedCount, "drafting", "조사중");
+  }
+
+  // 본문 인라인 인용 [https://url] → 작은 각주 링크
+  function linkifyCitations(body) {
+    var out = "", re = /\[(https?:\/\/[^\]\s]+)\]/g, last = 0, m, n = 0;
+    while ((m = re.exec(body)) !== null) {
+      out += esc(body.slice(last, m.index));
+      n++;
+      out += '<a class="cite" href="' + esc(m[1]) + '" target="_blank" rel="noopener">[' + n + ']</a>';
+      last = m.index + m[0].length;
+    }
+    out += esc(body.slice(last));
+    return out;
+  }
+
+  function renderReport(report) {
+    ensureReportScaffold();
+    // 남은 계획 항목 완료 처리
+    for (var i = draftedCount; i < planLen; i++) setPlan(i, "done", "완료");
+    var sections = report.sections || [];
+    var secHtml = sections.map(function (s) {
+      var srcs = (s.sources || []);
+      return '<div class="sec"><h3>' + esc(s.title) + '</h3><p>' + linkifyCitations(s.body || "") + '</p>' +
+        (srcs.length
+          ? '<div class="sources"><span class="lbl">출처</span>' +
+            srcs.map(function (u) { return '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a>'; }).join("") +
+            '</div>'
+          : '') +
+        '</div>';
+    }).join("");
+    var allSources = report.sources || [];
+    $("report").innerHTML =
+      '<div class="doc-topic">Deep Research Report</div>' +
+      '<h2 class="doc-title">' + esc(report.topic) + '</h2>' +
+      '<div class="exec">' + esc(report.executiveSummary) + '</div>' +
+      secHtml +
+      '<div class="conclusion"><h3>결론</h3><p>' + esc(report.conclusion) + '</p></div>' +
+      (allSources.length
+        ? '<div class="sources allsources"><span class="lbl">전체 출처 ' + allSources.length + '</span>' +
+          allSources.map(function (u) { return '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u) + '</a>'; }).join("") +
+          '</div>'
+        : "");
+    $("report").classList.add("show");
+    repMeta.textContent = sections.length + " sections · " + allSources.length + " sources";
+  }
+
+  // ── 이벤트 디스패치 ────────────────────────────────────────────
+  function handle(type, p) {
+    p = p || {};
+    switch (type) {
+      case "started":
+        pushEvent(type, "조사 시작 — <em>" + esc(trunc(p.topic, 80)) + "</em>");
+        break;
+      case "action-started":
+        pushEvent(type, "액션 시작 <em>" + esc(p.action) + "</em>");
+        break;
+      case "action-completed":
+        pushEvent(type, "액션 완료 <em>" + esc(p.action) + "</em> · " + esc(p.status), p.durationMs);
+        break;
+      case "tool-invoked":
+        pushEvent(type, "툴 호출 <em>" + esc(p.tool) + "</em> " + esc(trunc(p.input, 90)));
+        break;
+      case "tool-returned":
+        pushEvent(type, "툴 응답 <em>" + esc(p.tool) + "</em> " + esc(trunc(p.preview, 80)), p.durationMs);
+        break;
+      case "plan-formulated":
+        pushEvent(type, "계획 수립 · 하위주제 " + (p.subtopics ? p.subtopics.length : 0) + "개");
+        if (p.subtopics) renderPlan(p.subtopics);
+        break;
+      case "section-drafted":
+        pushEvent(type, "섹션 작성 <em>" + esc(trunc(p.title, 60)) + "</em> · 출처 " + esc(p.sourceCount));
+        onSectionDrafted();
+        break;
+      case "deep-research-completed":
+        pushEvent(type, "리포트 생성 완료 ✓");
+        if (p.report) renderReport(p.report);
+        finish("done", "완료");
+        break;
+      case "completed": // /api/research/stream 용 — 이 화면에선 미사용이나 안전 처리
+        pushEvent(type, "요약 완료");
+        finish("done", "완료");
+        break;
+      case "failed":
+        pushEvent(type, "실패 <em>" + esc(trunc(p.message, 120)) + "</em>");
+        finish("failed", "실패");
+        break;
+      default:
+        pushEvent(type, esc(JSON.stringify(p)));
+    }
+  }
+
+  // ── SSE 프레임 파싱 (data: 라인만 사용, payload에 type 포함) ──────
+  function parseFrame(frame) {
+    var lines = frame.split("\n"), data = "";
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (line.indexOf("data:") === 0) data += line.slice(5).replace(/^ /, "");
+    }
+    if (!data) return;
+    var obj;
+    try { obj = JSON.parse(data); } catch (e) { return; }
+    if (obj && obj.type) handle(obj.type, obj.payload);
+  }
+
+  async function run(topic) {
+    running = true; evN = 0; draftedCount = 0; planLen = 0; t0 = performance.now();
+    stream.innerHTML = ""; evCount.textContent = "0 events"; repMeta.textContent = "";
+    reportBody.innerHTML = '<div class="report-empty">계획 수립 중… 첫 이벤트를 기다리고 있습니다.</div>';
+    app.classList.add("running");
+    runBtn.disabled = true; stopBtn.disabled = false; topicInput.disabled = true;
+    setStatus("streaming", "스트리밍 중");
+
+    controller = new AbortController();
+    try {
+      var res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+        body: JSON.stringify({ topic: topic }),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        pushEvent("failed", "HTTP <em>" + res.status + "</em> — 서버 응답 오류");
+        finish("failed", "실패");
+        return;
+      }
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var buf = "";
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        buf += decoder.decode(chunk.value, { stream: true });
+        var idx;
+        while ((idx = buf.indexOf("\n\n")) >= 0) {
+          parseFrame(buf.slice(0, idx));
+          buf = buf.slice(idx + 2);
+        }
+      }
+      if (buf.trim()) parseFrame(buf);
+      // 스트림이 완료 이벤트 없이 끝난 경우
+      if (running) finish("done", "종료");
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        pushEvent("failed", "사용자에 의해 중단됨 <em>client abort</em>");
+        finish("failed", "중단됨");
+      } else {
+        pushEvent("failed", "네트워크 오류 <em>" + esc(err && err.message) + "</em>");
+        finish("failed", "실패");
+      }
+    }
+  }
+
+  function finish(s, txt) {
+    if (!running) return;
+    running = false; controller = null;
+    app.classList.remove("running");
+    runBtn.disabled = false; stopBtn.disabled = true; topicInput.disabled = false;
+    setStatus(s, txt);
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (running) return;
+    var topic = topicInput.value.trim();
+    if (!topic) { topicInput.focus(); return; }
+    run(topic);
+  });
+  stopBtn.addEventListener("click", function () { if (controller) controller.abort(); });
+
+  $("themeBtn").addEventListener("click", function () {
+    var root = document.documentElement;
+    var cur = root.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+</body>
+</html>
